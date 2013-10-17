@@ -5,8 +5,45 @@
   </head>
   <body>
 
-    <div id='element' style='padding:20px; background: silver; border: 1px solid gray'>
-      I am an element
+    <div id='element4' style='padding:20px; background: silver; border: 1px solid gray; height: 100px; width: 300px'>
+      cssTransition(element4, {
+        position: 'fixed',
+        top: '300px',
+        right: '500px'
+      }, 400)
+    </div>
+
+    <div>
+      <div id='element1' style='padding:20px; background: silver; border: 1px solid gray'>
+          cssTransition(element1, {
+            height: '200px',
+            width: '600px',
+            backgroundColor: 'red'
+          }, 400)
+      </div>
+    </div>
+
+    <div id='element5' style='
+      padding:20px; background: silver; border: 1px solid gray; height: 100px; width: 300px;
+      position: fixed; bottom: 20px; right: 20px
+    '>
+      cssTransition(element5, {
+        position: 'static',
+      }, 400)
+    </div>
+
+    <div id='element2' style='padding:20px; background: silver; border: 1px solid gray; height: 300px; width: 300px'>
+      cssTransition(element2, {
+        height: 'auto',
+        width: 'auto'
+      }, 400)
+    </div>
+
+    <div id='element3' style='padding:20px; background: silver; border: 1px solid gray; height: 100px; width: 300px'>
+      cssTransition(element3, {
+        marginLeft: 'auto',
+        marginRight: 'auto'
+      }, 400)
     </div>
 
     <script src='example.js'></script>

@@ -10,13 +10,14 @@ module.exports = function(element, targetAttributes, time, easing, cb){
     return cb&&cb()
   }
 
-  var targetAttributes = normalize(targetAttributes)
+  var targetAttributes = normalize(element, targetAttributes)
 
   var startAttributes = getStart(element, targetAttributes)
-  var endAttributes = getEnd(element, targetAttributes)
+  var endAttributes = getEnd(element, startAttributes, targetAttributes)
+  var finalAttributes = getFinal(element, endAttributes, targetAttributes)
 
   var transition = Object.keys(endAttributes).map(function(key){
-    return dasherize(key) + ' ' + time + 'ms'
+    return dasherize(key) + ' ' + time + 'ms ' + (easing || '')
   }).join(', ')
 
   if (Object.keys(endAttributes).length){
@@ -30,7 +31,7 @@ module.exports = function(element, targetAttributes, time, easing, cb){
 
       setTimeout(function(){
         element.style.transition = null
-        set(element, targetAttributes)
+        set(element, finalAttributes)
         cb&&cb()
       }, time)
 
@@ -52,81 +53,131 @@ function getStart(element, targetAttributes){
   var result = {}
 
   Object.keys(targetAttributes).forEach(function(key){
-    if (currentStyle[key] && currentStyle[key]){
-      result[key] = currentStyle[key]
-    }
+    result[key] = currentStyle[key]
   })
 
-  return result
-}
+  // handle absolute position transition
+  if (targetAttributes['position']){
+    if (currentStyle['position'] != targetAttributes['position']){
 
-function getEnd(element, targetAttributes){
-  var currentStyle = window.getComputedStyle(element)
-  var result = {}
+      var offset = {top: 0, left: 0}
+      if (currentStyle['position'] == 'fixed'){
+        offset = getDestinationOffset(element)
+        console.log(offset, element.offsetTop, element.offsetLeft)
+      }
 
-  Object.keys(targetAttributes).forEach(function(key){
-    var value = targetAttributes[key]
-    if (targetAttributes[key] == 'auto') {
-      value = getAuto(element, key)
-    }
-    if (value != currentStyle[key]){
-      result[key] = value
-    }
-  })
+      result['position'] = 'relative'
+      result['top'] = (element.offsetTop + offset.top) + 'px'
+      result['left'] = (element.offsetLeft + offset.left) + 'px'
+      result['right'] = 'auto'
+      result['bottom'] = 'auto'
+      result['width'] = currentStyle['width']
+      result['height'] = currentStyle['height']
 
-  return result
-}
-
-function getAuto(element, property){
-  var style = window.getComputedStyle(element)
-  var borderBoxSizing = style['box-sizing'] == 'border-box'
-  if (property == 'width'){
-    var width = element.scrollWidth
-
-    // handle full width div
-    if (style['position'] == 'static' && style['display'] == 'block' && element.parentNode){
-      var parentStyle = window.getComputedStyle(element.parentNode)
-      if (parentStyle['box-sizing'] == 'border-box'){
-        width = element.parentNode.scrollWidth
-      } else {
-        var extra = parsePx(parentStyle.borderLeftWidth) + 
-          parsePx(parentStyle.borderRightWidth) + 
-          parsePx(parentStyle.paddingLeft) + 
-          parsePx(parentStyle.paddingRight)
-        width = element.parentNode.scrollWidth - extra
+      if (targetAttributes['position'] == 'static'){
+        result['marginBottom'] = (parsePx(currentStyle['marginBottom']) - element.offsetHeight) + 'px'
+      } else if (currentStyle['position'] == 'static') {
+        result['marginBottom'] = currentStyle['marginBottom']
       }
     }
-
-    if (borderBoxSizing){
-      return width + 'px'
-    } else {
-      var extra = parsePx(style.borderLeftWidth) + 
-        parsePx(style.borderRightWidth) + 
-        parsePx(style.paddingLeft) + 
-        parsePx(style.paddingRight)
-      return (width - extra) + 'px'
-    }
-  } else if (property == 'height'){
-    var height = element.scrollHeight
-    if (borderBoxSizing){
-      return height + 'px'
-    } else {
-      var extra = parsePx(style.borderBottomWidth) + 
-        parsePx(style.borderTopWidth) + 
-        parsePx(style.paddingTop) + 
-        parsePx(style.paddingBottom)
-      return (height - extra) + 'px'
-    }
   }
-  return 'auto'
+
+  return result
 }
 
-function normalize(attributes){
+function getEnd(element, startAttributes, targetAttributes){
+
   var result = {}
-  Object.keys(attributes).forEach(function(key){
-    result[camelize(key)] = key
+  var originals = {}
+
+  var offsetTop = element.offsetTop
+  var offsetLeft = element.offsetLeft
+  var originalPosition = window.getComputedStyle(element)['position']
+
+  // simulate new attributes to resolve autos
+  Object.keys(targetAttributes).forEach(function(key){
+    originals[key] = element.style[key]
+    element.style[key] = targetAttributes[key]
+  })
+  var targetStyle = window.getComputedStyle(element)
+  Object.keys(targetAttributes).forEach(function(key){
+    if (startAttributes[key] != targetStyle[key]){
+      result[key] = targetStyle[key]
+    }
+  })
+
+
+  // handle absolute position transition
+  if (startAttributes['position'] != targetAttributes['position']){
+    result['position'] = 'relative'
+    result['top'] = (element.offsetTop - offsetTop) + 'px'
+    result['left'] = (element.offsetLeft - offsetLeft) + 'px'
+    result['right'] = 'auto'
+    result['bottom'] = 'auto'
+
+    if (targetAttributes['position'] == 'static'){
+      result['top'] = '0px'
+      result['left'] = '0px'
+      result['marginBottom'] = element.style['marginBottom']
+    } else if (originalPosition == 'static' && !result['marginBottom']){
+      result['marginBottom'] = (parsePx(startAttributes['marginBottom']) - element.offsetHeight) + 'px'
+    } 
+  }
+
+  // revert attribute change
+  Object.keys(originals).forEach(function(key){
+    element.style[key] = originals[key]
+  })
+
+  return result
+}
+
+function getFinal(element, endAttributes, targetAttributes){
+  var result = {}
+  Object.keys(endAttributes).forEach(function(key){
+    result[key] = element.style[key]
+  })
+  Object.keys(targetAttributes).forEach(function(key){
+    result[key] = targetAttributes[key]
   })
   return result
+}
+
+function normalize(element, attributes){
+  var result = {}
+  Object.keys(attributes).forEach(function(key){
+    result[camelize(key)] = attributes[key]
+  })
+  return result
+}
+
+function getOffset(element){
+  var result = {
+    top: 0,
+    left: 0
+  }
+
+  while (element){
+    result.top += element.offsetTop
+    result.left += element.offsetLeft
+    element = element.offsetParent
+  }
+
+  return result
+}
+
+function getDestinationOffset(element){
+  var revert = element.style.position
+  element.style.position = 'static'
+
+  var parent = element.offsetParent
+  var value = getOffset(element)
+
+  element.style.position = revert
+  return {
+    top: -value.top + document.body.scrollTop,
+    left: -value.left + document.body.scrollLeft
+  }
 }
 
 function parsePx(px){
