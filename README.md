@@ -6,7 +6,7 @@ Animate between DOM style changes using css transitions.
 ## Install
 
 ```bash
-npm install css-transition
+$ npm install css-transition
 ```
 
 ## Example
