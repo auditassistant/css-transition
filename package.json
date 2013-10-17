@@ -1,0 +1,28 @@
+{
+  "name": "css-transition",
+  "version": "0.0.0",
+  "description": "Create and trigger css transition animations from javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "example": "cd example && open http://localhost:9966 && beefy example.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmckegg/css-transition"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "beefy": "*"
+  },
+  "keywords": [
+    "css",
+    "transition",
+    "animate"
+  ],
+  "author": "Matt McKegg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mmckegg/css-transition/issues"
+  }
+}
