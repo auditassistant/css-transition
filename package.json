@@ -1,6 +1,6 @@
 {
   "name": "css-transition",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Animate between DOM style changes using css transitions",
   "main": "index.js",
   "scripts": {
