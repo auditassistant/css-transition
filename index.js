@@ -110,7 +110,7 @@ function getEnd(element, startAttributes, targetAttributes){
 
 
   // handle absolute position transition
-  if (startAttributes['position'] != targetAttributes['position']){
+  if (targetAttributes['position'] && startAttributes['position'] != targetAttributes['position']){
     result['position'] = 'relative'
     result['top'] = (element.offsetTop - offsetTop) + 'px'
     result['left'] = (element.offsetLeft - offsetLeft) + 'px'
