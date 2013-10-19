@@ -22,7 +22,7 @@ module.exports = function(element, targetAttributes, time, easing, cb){
 
   if (Object.keys(endAttributes).length){
     set(element, startAttributes)
-    process.nextTick(function(){
+    setTimeout(function(){
       element.style.transition = transition
       set(element, endAttributes)
 
@@ -34,8 +34,9 @@ module.exports = function(element, targetAttributes, time, easing, cb){
         set(element, finalAttributes)
         cb&&cb()
       }, time)
+    }, 15)
 
-    })
+
   } else {
     return cb&&cb()
   }
@@ -60,19 +61,20 @@ function getStart(element, targetAttributes){
   if (targetAttributes['position']){
     if (currentStyle['position'] != targetAttributes['position']){
 
-      var offset = {top: 0, left: 0}
-      if (currentStyle['position'] == 'fixed'){
-        offset = getDestinationOffset(element)
-        console.log(offset, element.offsetTop, element.offsetLeft)
-      }
 
       result['position'] = 'relative'
-      result['top'] = (element.offsetTop + offset.top) + 'px'
-      result['left'] = (element.offsetLeft + offset.left) + 'px'
+      result['top'] = '0'
+      result['left'] = '0'
       result['right'] = 'auto'
       result['bottom'] = 'auto'
       result['width'] = currentStyle['width']
       result['height'] = currentStyle['height']
+
+      if (currentStyle['position'] == 'fixed'){
+        var offset = getDestinationOffset(element)
+        result['top'] = (element.offsetTop + offset.top) + 'px'
+        result['left'] = (element.offsetLeft + offset.left) + 'px'
+      }
 
       if (targetAttributes['position'] == 'static'){
         result['marginBottom'] = (parsePx(currentStyle['marginBottom']) - element.offsetHeight) + 'px'
