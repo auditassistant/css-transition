@@ -3,6 +3,8 @@ css-transition
 
 Animate between DOM style changes using css transitions.
 
+Also supports a few extra transitions not currently available in vanilla css such as **position** (`static` <-> `absolute`/`fixed`) and **auto** values (e.g. `height: auto`).
+
 ## Install
 
 ```bash
@@ -30,4 +32,4 @@ cssTransition(element, {
 })
 ```
 
-Run `npm start example` and navigate to `http://localhost:9966` to see it in action.
+Run `npm run example` and navigate to `http://localhost:9966` to see it in action.
