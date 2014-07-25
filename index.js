@@ -30,7 +30,7 @@ module.exports = function(element, targetAttributes, time, easing, cb){
       // if a transition actually took place, so we'll use setTimeout
 
       setTimeout(function(){
-        element.style.transition = null
+        element.style.transition = ''
         set(element, finalAttributes)
         cb&&cb()
       }, time)
