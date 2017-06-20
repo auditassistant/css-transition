@@ -1,6 +1,6 @@
 {
   "name": "css-transition",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Animate between DOM style changes using css transitions",
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,9 @@
     "type": "git",
     "url": "https://github.com/mmckegg/css-transition"
   },
-  "dependencies": {},
+  "dependencies": {
+    "promise-polyfill": "^6.0.2"
+  },
   "devDependencies": {
     "beefy": "*"
   },
