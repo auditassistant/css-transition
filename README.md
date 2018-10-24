@@ -5,6 +5,10 @@ Animate between DOM style changes using css transitions.
 
 Also supports a few extra transitions not currently available in vanilla css such as **position** (`static` <-> `absolute`/`fixed`) and **auto** values (e.g. `height: auto`).
 
+## About this fork
+
+this fork simply makes the cssTransition function return a Promise.
+
 ## Install
 
 ```bash
