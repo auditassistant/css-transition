@@ -1,45 +1,62 @@
 module.exports = function(element, targetAttributes, time, easing, cb){
-  if (typeof easing == 'function'){
-    cb = easing
-    easing = null
-  }
 
-  if (!('transition' in element.style)){
-    // crappy fallback
-    set(element, targetAttributes)
-    return cb&&cb()
-  }
+  var Promise = require("promise-polyfill");
+  var args = arguments;
 
-  var targetAttributes = normalize(element, targetAttributes)
+  return new Promise(function (resolve, reject) {
 
-  var startAttributes = getStart(element, targetAttributes)
-  var endAttributes = getEnd(element, startAttributes, targetAttributes)
-  var finalAttributes = getFinal(element, endAttributes, targetAttributes)
+    element = args[0];
+    targetAttributes = args[1];
+    time = args[2];
+    easing = args[3];
+    cb = args[4];
 
-  var transition = Object.keys(endAttributes).map(function(key){
-    return dasherize(key) + ' ' + time + 'ms ' + (easing || '')
-  }).join(', ')
+    if (typeof easing == 'function'){
+      cb = easing
+      easing = null
+    }
 
-  if (Object.keys(endAttributes).length){
-    set(element, startAttributes)
-    setTimeout(function(){
-      element.style.transition = transition
-      set(element, endAttributes)
+    if (!('transition' in element.style)){
+      // crappy fallback
+      set(element, targetAttributes)
+      if ( cb ) cb();
+      resolve();
+    }
 
-      // using transitionend is unreliable - it only fires 
-      // if a transition actually took place, so we'll use setTimeout
+    var targetAttributes = normalize(element, targetAttributes)
 
+    var startAttributes = getStart(element, targetAttributes)
+    var endAttributes = getEnd(element, startAttributes, targetAttributes)
+    var finalAttributes = getFinal(element, endAttributes, targetAttributes)
+
+    var transition = Object.keys(endAttributes).map(function(key){
+      return dasherize(key) + ' ' + time + 'ms ' + (easing || '')
+    }).join(', ')
+
+    if (Object.keys(endAttributes).length){
+      set(element, startAttributes)
       setTimeout(function(){
-        element.style.transition = ''
-        set(element, finalAttributes)
-        cb&&cb()
-      }, time)
-    }, 15)
+        element.style.transition = transition
+        set(element, endAttributes)
+
+        // using transitionend is unreliable - it only fires
+        // if a transition actually took place, so we'll use setTimeout
+
+        setTimeout(function(){
+          element.style.transition = ''
+          set(element, finalAttributes)
+          if ( cb ) cb();
+          resolve();
+        }, time)
+      }, 15)
 
 
-  } else {
-    return cb&&cb()
-  }
+    } else {
+      if ( cb ) cb();
+      resolve();
+    }
+
+  });
 
 }
 
@@ -123,7 +140,7 @@ function getEnd(element, startAttributes, targetAttributes){
       result['marginBottom'] = element.style['marginBottom']
     } else if (originalPosition == 'static' && !result['marginBottom']){
       result['marginBottom'] = (parsePx(startAttributes['marginBottom']) - element.offsetHeight) + 'px'
-    } 
+    }
   }
 
   // revert attribute change
